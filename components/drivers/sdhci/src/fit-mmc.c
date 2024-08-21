@@ -51,7 +51,7 @@ static void plat_request(struct rt_mmcsd_host *host, struct rt_mmcsd_req *req)
     }
     if (req->data)
     {
-        if (rt_kmem_v2p(req->data->buf) > 0xffffffff)
+        if ((rt_uint64_t)rt_kmem_v2p(req->data->buf) > 0xffffffff)
         {
             void *dma_buffer = rt_malloc(ARCH_PAGE_SIZE);
             void *req_buf    = NULL;
