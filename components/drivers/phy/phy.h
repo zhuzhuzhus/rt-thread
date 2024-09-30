@@ -3,12 +3,33 @@
 #include <net/ethernet.h>
 #include <rtthread.h>
 #include "mdio.h"
-
-
+#include "ofw.h"
+#define RT_PHY_MAX 32
 struct rt_phy_device
 {
     struct rt_device parent;
-    struct mdio_bus *bus;
+    struct mmi_bus *bus;
+	struct rt_phy_driver *drv;
+	rt_uint32_t    phy_id;
+	rt_uint32_t    mmds;
+	int            speed;
+	int            duplex;
+
+	int            link;
+	int            port;
+	rt_uint32_t    advertising;
+	rt_uint32_t    supported;
+	int            autoneg;
+	int            pause;
+	rt_ubase_t     addr;
+	rt_bool_t      is_c45;
+
+	rt_phy_interface interface;
+
+#ifdef RT_USING_OFW
+	struct rt_ofw_node *node;
+#endif
+	void          *priv;
 };
 
 struct rt_phy_driver
