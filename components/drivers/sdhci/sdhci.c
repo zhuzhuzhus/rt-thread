@@ -24,6 +24,44 @@ static unsigned int debug_quirks2;
 /*                        cmd                              */
 /********************************************************* */
 
+
+void read_reg(struct sdhci_host *host)
+{
+    rt_kprintf("0x00 addddddddddddd           = %x \n", sdhci_readl(host, 0x00));
+	rt_kprintf("0x04 EMMC_BLOCKSIZE           = %x \n", sdhci_readw(host, 0x04));
+    rt_kprintf("0x06 EMMC_BLOCKCOUNT          = %x \n", sdhci_readw(host, 0x06));
+    rt_kprintf("0x08 SDHCI_ARGUMENT           = %x \n", sdhci_readl(host, 0x08));
+    rt_kprintf("0x0c EMMC_XFER_MODE           = %x \n", sdhci_readw(host, 0x0c));
+    rt_kprintf("0x0e SDHCI_COMMAND            = %x \n", sdhci_readw(host, 0x0e));
+    rt_kprintf("0x24 SDHCI_PRESENT_STATE      = %x \n", sdhci_readl(host, 0x24));
+    rt_kprintf("0x28 SDHCI_HOST_CONTROL       = %x \n", sdhci_readb(host, 0x28));
+    rt_kprintf("0x29 SDHCI_POWER_CONTROL      = %x \n", sdhci_readb(host, 0x29));
+    rt_kprintf("0x2a EMMC_BGAP_CTRL           = %x \n", sdhci_readb(host, 0x2a));
+    rt_kprintf("0x2c EMMC_CLK_CTRL            = %x \n", sdhci_readw(host, 0x2c));
+    rt_kprintf("0x2e EMMC_TOUT_CTRL           = %x \n", sdhci_readb(host, 0x2e));
+    rt_kprintf("0x2f EMMC_SW_RST              = %x \n", sdhci_readb(host, 0x2f));
+    rt_kprintf("0x30 SDHCI_INT_STATUS         = %x \n", sdhci_readw(host, 0x30));
+    rt_kprintf("0x32 SDHCI_ERR_INT_STATUS     = %x \n", sdhci_readw(host, 0x32));
+    rt_kprintf("0x34 SDHCI_INT_ENABLE         = %x \n", sdhci_readw(host, 0x34));
+    rt_kprintf("0x36 EMMC ERROR INT STATEN    = %x \n", sdhci_readw(host, 0x36));
+    rt_kprintf("0x38 EMMC NORMAL INT SIGNAL EN= %x \n", sdhci_readw(host, 0x38));
+    rt_kprintf("0x3a EMMC ERROR INT SIGNAL EN = %x \n", sdhci_readw(host, 0x3a));
+    rt_kprintf("0x3c EMMC_AUTO_CMD_STAT       = %x \n", sdhci_readw(host, 0x3c));
+    rt_kprintf("0x3e EMMC_HOST_CTRL2          = %x \n", sdhci_readw(host, 0x3e));
+    rt_kprintf("0x40 EMMC_CAPABILITIES1       = %x \n", sdhci_readl(host, 0x40));
+    rt_kprintf("0x44 EMMC_CAPABILITIES2       = %x \n", sdhci_readl(host, 0x44));
+    rt_kprintf("0x52 EMMC_FORC_ERR_INT_STAT   = %x \n", sdhci_readw(host, 0x52));
+    rt_kprintf("0x54 EMMC_ADMA_ERR_STAT       = %x \n", sdhci_readb(host, 0x54));
+    rt_kprintf("0x58 EMMC_ADMA_SA       = %x \n", sdhci_readl(host, 0x58));
+    rt_kprintf("0x66 EMMC_PRESET_SDR12        = %x \n", sdhci_readw(host, 0x66));
+    rt_kprintf("0x68 EMMC_PRESET_SDR25        = %x \n", sdhci_readw(host, 0x68));
+    rt_kprintf("0x6a EMMC_PRESET_SDR50        = %x \n", sdhci_readw(host, 0x6a));
+    rt_kprintf("0x6c EMMC_PRESET_SDR104       = %x \n", sdhci_readw(host, 0x6c));
+    rt_kprintf("0x6e EMMC_PRESET_DDR50        = %x \n", sdhci_readw(host, 0x6e));
+    rt_kprintf("0x78 EMMC_ADMA_ID             = %x \n", sdhci_readl(host, 0x78));
+    rt_kprintf("0xfe EMMC_HOST_CNTRL_VERS     = %x \n", sdhci_readw(host, 0xfe));
+
+}
 static inline rt_bool_t sdhci_has_requests(struct sdhci_host *host)
 {
     return host->cmd || host->data_cmd;
@@ -632,26 +670,25 @@ static inline rt_bool_t sdhci_defer_done(struct sdhci_host   *host,
 /*                        pio                              */
 /********************************************************* */
 
-static void sdhci_read_block_pio(struct sdhci_host *host)
+static void sdhci_read_block_pio(struct sdhci_host *host,void **buf)
 {
     rt_uint32_t scratch;
     size_t      len;
-    char       *buf     = (char *)host->data->buf;
+
     rt_uint32_t blksize = host->data->blksize;
     while (blksize)
     {
         len = min(4U, blksize);
 
         scratch = sdhci_readl(host, SDHCI_BUFFER);
+        rt_memcpy(*buf, &scratch, len);
 
-        memcpy(buf, &scratch, len);
-
-        buf     += len;
+        *buf     += len;
         blksize -= len;
     }
 }
 
-static void sdhci_write_block_pio(struct sdhci_host *host)
+static void sdhci_write_block_pio(struct sdhci_host *host,void **buf)
 {
     size_t      blksize, len;
     rt_uint32_t scratch;
@@ -659,12 +696,12 @@ static void sdhci_write_block_pio(struct sdhci_host *host)
 
     blksize   = host->data->blksize;
     scratch   = 0;
-    char *buf = (char *)host->data->buf;
+
     while (blksize)
     {
         len = min(4U, blksize);
-        memcpy(&scratch, buf, len);
-        buf     += len;
+        rt_memcpy(&scratch, *buf, len);
+        *buf     += len;
         blksize -= len;
         sdhci_writel(host, scratch, SDHCI_BUFFER);
     }
@@ -691,15 +728,16 @@ static void sdhci_transfer_pio(struct sdhci_host *host)
     {
         mask = ~0;
     }
+    void *buf = (void *)host->data->buf;
     while (sdhci_readl(host, SDHCI_PRESENT_STATE) & mask)
     {
         if (host->quirks & SDHCI_QUIRK_PIO_NEEDS_DELAY)
             rt_hw_us_delay(100);
 
         if (host->data->flags & DATA_DIR_READ)
-            sdhci_read_block_pio(host);
+            sdhci_read_block_pio(host,&buf);
         else
-            sdhci_write_block_pio(host);
+            sdhci_write_block_pio(host,&buf);
 
         host->data->blks--;
         if (host->data->blks == 0)
@@ -1443,7 +1481,7 @@ static rt_bool_t sdhci_send_command(struct sdhci_host *host, struct rt_mmcsd_cmd
         else
             sdhci_prepare_data(host, cmd);
     }
-
+    sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
 
     sdhci_set_transfer_mode(host, cmd);
 
@@ -1486,7 +1524,7 @@ static rt_bool_t sdhci_send_command(struct sdhci_host *host, struct rt_mmcsd_cmd
 
     if (host->use_external_dma)
         sdhci_external_dma_pre_transfer(host, cmd);
-    sdhci_writel(host, cmd->arg, SDHCI_ARGUMENT);
+    
     sdhci_writew(host, SDHCI_MAKE_CMD(cmd->cmd_code, flags), SDHCI_COMMAND);
     return RT_TRUE;
 }
