@@ -64,7 +64,7 @@ struct sdhci_host *sdhci_pltfm_init(struct rt_platform_device     *pdev,
     {
         return RT_NULL;
     }
-    host = sdhci_alloc_host(dev, priv_size);
+    host = sdhci_alloc_host(dev,sizeof(struct sdhci_pltfm_host) + priv_size);
     if (!host)
     {
         return RT_NULL;
