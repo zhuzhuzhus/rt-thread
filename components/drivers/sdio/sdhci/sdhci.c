@@ -714,7 +714,7 @@ static rt_bool_t sdhci_presetable_values_change(struct rt_sdhci_host *host, stru
 }
 
 
-static void sdhci_enable_preset_value(struct rt_sdhci_host *host, rt_bool_t enable)
+static void sdhci_preset_value_enable(struct rt_sdhci_host *host, rt_bool_t enable)
 {
     if (host->version < RT_SDHCI_SPEC_300)
         return;
@@ -1558,7 +1558,7 @@ static void rt_sdhci_read_rsp_136(struct rt_sdhci_host *host, struct rt_mmcsd_cm
     }
 }
 
-static void sdhci_finish_command(struct rt_sdhci_host *host)
+static void sdhci_command_end(struct rt_sdhci_host *host)
 {
     struct rt_mmcsd_cmd *cmd = host->cmd;
 
@@ -1664,7 +1664,7 @@ static void sdhci_cmd_irq(struct rt_sdhci_host *host, rt_uint32_t intmask, rt_ui
     }
 
     if (intmask & RT_SDHCI_INT_RESPONSE)
-        sdhci_finish_command(host);
+        sdhci_command_end(host);
 }
 
 static void sdhci_irq(int irq, void *dev_id)
@@ -2141,7 +2141,7 @@ int __sdhci_execute_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode)
 
         if (!host->tuning_done)
         {
-            sdhci_abort_tuning(host, opcode);
+            rt_sdhci_abort_tuning(host, opcode);
             return -ETIMEDOUT;
         }
 
@@ -2183,7 +2183,7 @@ void rt_sdhci_end_tuning(struct rt_sdhci_host *host)
     rt_sdhci_writel(host, host->ier, RT_SDHCI_SIGNAL_ENABLE);
 }
 
-void sdhci_abort_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode)
+void rt_sdhci_abort_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode)
 {
     rt_sdhci_reset_tuning(host);
 
@@ -2247,7 +2247,7 @@ void rt_sdhci_reset_tuning(struct rt_sdhci_host *host)
 /********************************************************* */
 static const struct mmc_host_ops rt_sdhci_ops = {
     .request                     = rt_sdhci_start_request,
-    .set_ios                     = rt_rt_sdhci_ios_set,
+    .set_ios                     = rt_sdhci_ios_set,
     .get_cd                      = sdhci_get_cd,
     .get_ro                      = rt_sdhci_ro_get,
     .enable_sdio_irq             = rt_sdhci_enable_io_irq,
@@ -3026,7 +3026,7 @@ cleanup:
     return ret;
 }
 
-void rt_rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios)
+void rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios)
 {
     struct rt_sdhci_host *host           = mmc_priv(mmc);
     rt_bool_t          reinit_uhs     = host->reinit_uhs;
@@ -3052,7 +3052,7 @@ void rt_rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios)
     }
 
     if (host->version >= RT_SDHCI_SPEC_300 && (ios->power_mode == MMC_POWER_UP) && !(host->quirks2 & RT_SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
-        sdhci_enable_preset_value(host, RT_FALSE);
+        sdhci_preset_value_enable(host, RT_FALSE);
 
     if (!ios->clock || ios->clock != host->clock)
     {
@@ -3133,7 +3133,7 @@ void rt_rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios)
         {
             rt_uint16_t preset;
 
-            sdhci_enable_preset_value(host, RT_TRUE);
+            sdhci_preset_value_enable(host, RT_TRUE);
             preset         = sdhci_get_preset_value(host);
             ios->drv_type  = FIELD_GET(RT_SDHCI_PRESET_DRV_MASK,
                                        preset);

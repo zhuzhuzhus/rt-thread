@@ -637,20 +637,20 @@ static inline void *sdhci_priv(struct rt_sdhci_host *host)
     return host->private;
 }
 
-void rt_sdhci_read_caps(struct rt_sdhci_host *host, const rt_uint16_t *ver,
+void        rt_sdhci_read_caps(struct rt_sdhci_host *host, const rt_uint16_t *ver,
                        const rt_uint32_t *caps, const rt_uint32_t *caps1);
-int  rt_sdhci_setup_host(struct rt_sdhci_host *host);
-void rt_sdhci_cleanup_host(struct rt_sdhci_host *host);
-int  rt_sdhci_set_and_add_host(struct rt_sdhci_host *host);
-int  rt_sdhci_init_host(struct rt_sdhci_host *host);
-void rt_sdhci_uninit_host(struct rt_sdhci_host *host, int dead);
+int         rt_sdhci_setup_host(struct rt_sdhci_host *host);
+void        rt_sdhci_cleanup_host(struct rt_sdhci_host *host);
+int         rt_sdhci_set_and_add_host(struct rt_sdhci_host *host);
+int         rt_sdhci_init_host(struct rt_sdhci_host *host);
+void        rt_sdhci_uninit_host(struct rt_sdhci_host *host, int dead);
 
 rt_uint16_t rt_sdhci_clk_set(struct rt_sdhci_host *host, unsigned int clock,
                            unsigned int *actual_clock);
 void        rt_sdhci_set_clock(struct rt_sdhci_host *host, unsigned int clock);
 void        rt_rt_sdhci_clk_enable(struct rt_sdhci_host *host, rt_uint16_t clk);
 void        rt_sdhci_set_power(struct rt_sdhci_host *host, unsigned char mode,unsigned short vdd);
-void rt_read_reg(struct rt_sdhci_host* host);
+void        rt_read_reg(struct rt_sdhci_host* host);
 
 void        rt_rt_sdhci_set_power_with_noreg(struct rt_sdhci_host *host, unsigned char mode,
                                   unsigned short vdd);
@@ -661,21 +661,17 @@ void        rt_sdhci_reset(struct rt_sdhci_host *host, rt_uint8_t mask);
 void        rt_sdhci_set_uhs(struct rt_sdhci_host *host, unsigned timing);
 int         rt_sdhci_execute_tuning(struct rt_mmc_host *mmc, rt_uint32_t opcode);
 int         __sdhci_execute_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
-void        rt_rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios);
+void        rt_sdhci_ios_set(struct rt_mmc_host *mmc, struct rt_mmcsd_io_cfg *ios);
 int         rt_sdhci_start_signal_voltage_switch(struct rt_mmc_host        *mmc,
                                               struct rt_mmcsd_io_cfg *ios);
 void        rt_sdhci_enable_io_irq(struct rt_mmc_host *mmc, int enable);
-
-void rt_sdhci_dumpregs(struct rt_sdhci_host *host);
-void sdhci_enable_v4_mode(struct rt_sdhci_host *host);
-
-void rt_sdhci_start_tuning(struct rt_sdhci_host *host);
-void rt_sdhci_end_tuning(struct rt_sdhci_host *host);
-void rt_sdhci_reset_tuning(struct rt_sdhci_host *host);
-void rt_sdhci_send_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
-void sdhci_abort_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
-void sdhci_switch_external_dma(struct rt_sdhci_host *host, rt_bool_t en);
-void rt_sdhci_data_irq_timeout(struct rt_sdhci_host *host, rt_bool_t enable);
-void rt_sdhci_timeout_set(struct rt_sdhci_host *host, struct rt_mmcsd_cmd *cmd);
+void        rt_sdhci_start_tuning(struct rt_sdhci_host *host);
+void        rt_sdhci_end_tuning(struct rt_sdhci_host *host);
+void        rt_sdhci_reset_tuning(struct rt_sdhci_host *host);
+void        rt_sdhci_send_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
+void        rt_sdhci_abort_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
+void        rt_sdhci_data_irq_timeout(struct rt_sdhci_host *host, rt_bool_t enable);
+void        rt_sdhci_timeout_set(struct rt_sdhci_host *host, struct rt_mmcsd_cmd *cmd);
+void        rt_read_reg_debug(struct rt_sdhci_host *host)
 
 #endif /* __RT_SDHCI_HW_H */
