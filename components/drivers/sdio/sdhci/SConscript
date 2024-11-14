@@ -10,8 +10,6 @@ CPPPATH = [cwd + '/include']
 
 src = []
 src += Glob('*.c')
-src += Glob('src/*.c')
-src += Glob('sdhci-platform/*.c')
 
 group = DefineGroup('sdhci-drivers', src, depend = [''], CPPPATH = CPPPATH)
 

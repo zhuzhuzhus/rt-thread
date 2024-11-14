@@ -7,10 +7,9 @@
  * Date           Author        Notes
  * 2024-08-16     zhujiale     first version
  */
-#ifndef __SDHCI_MISC_H__
-#define __SDHCI_MISC_H__
+#ifndef __RT_SDHCI_MISC_H__
+#define __RT_SDHCI_MISC_H__
 
-#include "sdhci_host.h"
 
 #define __BF_FIELD_CHECK(...)
 #define __bf_shf(x) (__builtin_ffsll(x) - 1)
@@ -59,8 +58,7 @@
 
 int       regulator_is_supported_voltage(struct regulator *regulator,
                                          int min_uV, int max_uV);
-int       regulator_enable(struct regulator *regulator);
-rt_bool_t mmc_can_gpio_cd(struct mmc_host *host);
+rt_bool_t rt_mmc_can_gpio_cd(struct rt_mmc_host *host);
 
 struct regulator
 {
@@ -68,9 +66,5 @@ struct regulator
 };
 
 int regulator_get_current_limit(struct regulator *regulator);
-
-int regulator_enable(struct regulator *regulator);
-
-void regulator_disable(struct regulator *regulator);
 
 #endif
