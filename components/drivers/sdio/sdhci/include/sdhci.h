@@ -672,6 +672,6 @@ void        rt_sdhci_send_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode)
 void        rt_sdhci_abort_tuning(struct rt_sdhci_host *host, rt_uint32_t opcode);
 void        rt_sdhci_data_irq_timeout(struct rt_sdhci_host *host, rt_bool_t enable);
 void        rt_sdhci_timeout_set(struct rt_sdhci_host *host, struct rt_mmcsd_cmd *cmd);
-void        rt_read_reg_debug(struct rt_sdhci_host *host)
+void        rt_read_reg_debug(struct rt_sdhci_host* host);
 
 #endif /* __RT_SDHCI_HW_H */

@@ -32,13 +32,12 @@ struct rt_sdhci_pltfm_host
 
     unsigned long private[];
 };
+void            rt_sdhci_get_property(struct rt_platform_device *pdev);
 
 static inline void sdhci_get_of_property(struct rt_platform_device *pdev)
 {
     return rt_sdhci_get_property(pdev);
 }
-
-void            rt_sdhci_get_property(struct rt_platform_device *pdev);
 extern struct   rt_sdhci_host *rt_sdhci_pltfm_init(struct rt_platform_device     *pdev,
                                            const struct rt_sdhci_pltfm_data *pdata,
                                            size_t                         priv_size);
